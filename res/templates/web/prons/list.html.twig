@@ -1,0 +1,306 @@
+{% extends "web/partials/main.html.twig" %}
+
+{% block main_div %}
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading">
+            {% block phrase_title %}
+                <div class="row">
+                    <div class="col-md-8">
+                        <ul class="nav nav-pills">
+                            <li {% if status == constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::NEWONE') %}class="active"{% endif %}><a href="{{uri.router('prons', 'list', {status: constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::NEWONE')}) }}" class="btn btn-sm">{{ 'new'|trans|capitalize }}</a></li>
+                            <li {% if status == constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::EASY') %}class="active"{% endif %}><a href="{{uri.router('prons', 'list', {status: constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::EASY')}) }}" class="btn btn-sm">{{ 'easy'|trans|capitalize }}</a></li>
+                            <li {% if status == constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::MEDIUM') %}class="active"{% endif %}><a href="{{uri.router('prons', 'list', {status: constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::MEDIUM')}) }}" class="btn btn-sm">{{ 'medium'|trans|capitalize }}</a></li>
+                            <li {% if status == constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::DIFFICULT') %}class="active"{% endif %}><a href="{{uri.router('prons', 'list', {status: constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::DIFFICULT')}) }}" class="btn btn-sm">{{ 'difficult'|trans|capitalize }}</a></li>
+                            <li {% if status == constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::RARE') %}class="active"{% endif %}><a href="{{uri.router('prons', 'list', {status: constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::RARE')}) }}" class="btn btn-sm">{{ 'rare'|trans|capitalize }}</a></li>
+                            <li {% if status == constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::ALL') %}class="active"{% endif %}><a href="{{uri.router('prons', 'list', {status: constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::ALL')}) }}" class="btn btn-sm">{{ 'all'|trans|capitalize }}</a></li>
+                            <li style="float:right">
+                                <form class="navbar-form navbar-right" action="/prons/search" method="post">
+                                    <div class="form-group">
+                                        <input type="text" name="key" placeholder="{{ 'search word'|trans }}" class="form-control">
+                                    </div>
+                                    <button type="submit" class="btn btn-success">{{ 'Search'|trans }}</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        {% include "web/partials/paginator.default.twig" %}
+                    </div>
+                </div>
+            {% endblock %}
+        </div>
+
+        <!-- Table -->
+        <table class="table eng-table">
+            <!--thead>
+              <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Username</th>
+                <th>Username</th>
+                <th>Username</th>
+              </tr>
+            </thead-->
+            <tbody>
+                {% for phrase in paginator %}
+                    <tr class="phrase-tr">
+                            <input class="phrase-voice" type="hidden" value="{{ phrase.voice }}"/>
+                            <input class="phrase-id" type="hidden" value="{{ phrase.id }}"/>
+                        <th width="40%" scope="row">
+                            <div class="eng-name">
+                                <div class="eng-item">{{ phrase.name }}</div>
+                                <div class="item-edit-div invisible">
+                                    <button type="button" class="item-edit btn btn-info btn-sm">{{ 'edit'|trans|capitalize }}</button>
+                                    <button type="button" class="item-save hidden btn btn-info btn-sm">{{ 'save'|trans|capitalize }}</button>
+                                    <button type="button" class="item-cancel hidden btn btn-info btn-sm">{{ 'cancel'|trans|capitalize }}</button>
+                                </div>
+                                <textarea class="item-textarea hidden green" rows="2" cols="60">{{ phrase.name }}</textarea>
+                            </div>
+                        </th>
+                        <td width="15%">
+                            <div class="eng-pron">
+                                <div class="eng-item">[{{ phrase.pronunciation }}]</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="eng-means invisible">
+                                <div class="eng-item">{{ phrase.means }}</div>
+                                <div class="item-edit-div invisible">
+                                    <button type="button" class="item-edit btn btn-info btn-sm">{{ 'edit'|trans|capitalize }}</button>
+                                    <button type="button" class="item-save hidden btn btn-info btn-sm">{{ 'save'|trans|capitalize }}</button>
+                                    <button type="button" class="item-cancel hidden btn btn-info btn-sm">{{ 'cancel'|trans|capitalize }}</button>
+                                </div>
+                                <textarea class="item-textarea hidden green" rows="2" cols="60">{{ phrase.means }}</textarea>
+                            </div>
+                        </td>
+                        <td width="10%">
+                            <div class="btn-group btn-group-xs status-dropdown">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="status-text">{{ attribute(statusString, phrase.status) }}</span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" style="min-width:80px;">
+                                <li><a href="#{{ constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::DIFFICULT') }}">{{ 'difficult' |trans|capitalize }}</a></li>
+                                <li><a href="#{{ constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::NEWONE') }}">{{ 'new'|trans|capitalize }}</a></li>
+                                <li><a href="#{{ constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::EASY') }}">{{ 'easy'|trans|capitalize }}</a></li>
+                                <li><a href="#{{ constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::MEDIUM') }}">{{ 'medium'|trans|capitalize }}</a></li>
+                                <li><a href="#{{ constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::RARE') }}">{{ 'rare'|trans|capitalize }}</a></li>
+                                </ul>
+                            </div>
+                            <span class="glyphicon glyphicon-download hand" title="{{ "Change voice"|trans }}"></span>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if paginator|length > 20 %}
+        <div class="panel-footer">
+            {{ block('phrase_title') }}
+        </div>
+        {% endif %}
+    </div>
+<audio id="audio" style="display: none"></audio>
+{% endblock %}
+
+{% block main_js %}
+<script>
+    $(function () {
+        var phraseList = {
+            currentPhraseDiv: null,
+            allTr: $('.phrase-tr'),
+            currentTr: null,
+            cancelEdit: function (mainDiv) {
+                mainDiv = $(mainDiv);
+                mainDiv.find('.eng-item').removeClass('hidden');
+                mainDiv.find('.item-edit-div').addClass('invisible');
+                mainDiv.find('.item-textarea').addClass('hidden');
+                mainDiv.find('.item-edit').removeClass('hidden');
+                mainDiv.find('.item-save').addClass('hidden');
+                mainDiv.find('.item-cancel').addClass('hidden');
+            },
+            savePhrase: function (mainDiv) {
+                var key,value;
+                if (mainDiv.hasClass('eng-means')) {
+                    key = 'means';
+                } else {
+                    key = 'name';
+                }
+                value = mainDiv.find('.item-textarea').val();
+                var phraseId = mainDiv.closest('tr').find('.phrase-id').val();
+
+                mainDiv.find('.item-save').addClass('disabled').prop('disabled', true);
+                mainDiv.find('.item-cancel').addClass('disabled').prop('disabled', true);
+
+                $.getJSON('{{ uri.router(null, 'savePron') }}?key=' + key + '&value=' + encodeURIComponent(value) + '&pron_id=' + phraseId, function (json) {
+                    if (json.status == 0) {
+                        EngUtil.showMessage('{{ 'Record Saved'|trans }}', 2);
+                        mainDiv.find('.eng-item').html(value);
+                        mainDiv.closest('tr').find('.phrase-voice').val(json.data.voice);
+                        phraseList.cancelEdit(mainDiv);
+                    } else if (json.status == 1){
+                        EngUtil.showAlert('{{ 'Record saved, voice save failed!'|trans }}');
+                        mainDiv.find('.eng-item').html(value);
+                        phraseList.cancelEdit(mainDiv);
+                    } else {
+                        EngUtil.showAlert('{{ 'Record Save Failed!'|trans }}');
+                    }
+                }).fail(function () {
+                    EngUtil.showAlert('{{ 'Request Server Error!'|trans }}');
+                }).always(function () {
+                    mainDiv.find('.item-save').removeClass('disabled').prop('disabled', false);
+                    mainDiv.find('.item-cancel').removeClass('disabled').prop('disabled', false);
+                });
+            },
+            init: function () {
+                $('.status-dropdown a').on('click', function () {
+                    var status = this.href.replace(/.*#/, '');
+                    var tr = $(this).closest('tr');
+                    var phraseId = tr.find('.phrase-id').val();
+                    var statusName = this.text;
+                    var textObj = tr.find('.status-text');
+                    if (statusName == textObj.text()) {
+                        return;
+                    }
+                    textObj.text('....');
+                    $.getJSON('{{ uri.router(null, 'changeStatus') }}?status=' + status + '&pron_id=' + phraseId, function (json) {
+                        if (json.status == 0) {
+                            textObj.text(statusName);
+                        }
+                    });
+                });
+
+                $('.eng-means').parent().mouseover(function () {
+                    $('.eng-means').removeClass('invisible');
+                }).mouseout(function () {
+                    $('.eng-means').addClass('invisible');
+                }).click(function (event) {
+                    if (event.target.tagName != 'DIV') {
+                        return;
+                    }
+
+                    if (phraseList.currentPhraseDiv != null && phraseList.currentPhraseDiv != this) {
+                        phraseList.cancelEdit(phraseList.currentPhraseDiv);
+                    }
+
+                    phraseList.currentPhraseDiv = this;
+                    phraseList.currentTr = $(this).closest('tr');
+                    var voice = phraseList.currentTr.find('.phrase-voice').val();
+
+                    $('#audio').attr('src','/voice/prons/' + voice);
+                    $('#audio')[0].volume = 1;
+                    $('#audio')[0].play();
+
+                    $('.item-edit-div').not('.invisible').addClass('invisible');
+
+                    $(this).find('.item-edit-div').removeClass('invisible');
+
+                    $('.td-highlight').removeClass('td-highlight');
+                    $(this).addClass('td-highlight');
+                });
+
+                $('.eng-name').parent().click(function (event) {
+                    if (event.target.tagName != 'DIV') {
+                        return;
+                    }
+
+                    if (phraseList.currentPhraseDiv != null && phraseList.currentPhraseDiv != this) {
+                        phraseList.cancelEdit(phraseList.currentPhraseDiv);
+                    }
+
+                    phraseList.currentPhraseDiv = this;
+                    phraseList.currentTr = $(this).closest('tr');
+                    var voice = phraseList.currentTr.find('.phrase-voice').val();
+
+                    $('#audio').attr('src','/voice/prons/' + voice);
+                    $('#audio')[0].volume = 1;
+                    $('#audio')[0].play();
+
+                    $('.item-edit-div').not('.invisible').addClass('invisible');
+                    $(this).find('.item-edit-div').removeClass('invisible');
+                    $('.td-highlight').removeClass('td-highlight');
+                    $(this).addClass('td-highlight');
+                });
+
+                $('.item-edit').click(function () {
+                    var mainDiv = $(this).closest('.eng-means,.eng-name');
+                    mainDiv.find('.eng-item').addClass('hidden');
+                    mainDiv.find('.item-textarea').removeClass('hidden');
+                    mainDiv.find('.item-edit').addClass('hidden');
+                    mainDiv.find('.item-save').removeClass('hidden');
+                    mainDiv.find('.item-cancel').removeClass('hidden');
+                });
+
+                $('.item-cancel').click(function () {
+                    phraseList.cancelEdit($(this).closest('.eng-means,.eng-name')[0]);
+                });
+
+                $('.item-save').click(function () {
+                    var mainDiv = $(this).closest('.eng-means,.eng-name');
+                    phraseList.savePhrase(mainDiv);
+                });
+
+                $(document).keydown(function(e){
+                    if ($('.item-textarea').not('.hidden').length > 0) { // In edit mode
+                        return;
+                    }
+                    switch(e.keyCode){
+                        case 37://<-
+                            if (phraseList.currentTr.prev().length > 0) {
+                                phraseList.currentTr = phraseList.currentTr.prev();
+                            } else {
+                                return;
+                            }
+                            break;
+                        case 40:// down
+                            return true;
+                        case 39://->
+                            if (phraseList.currentTr.next().length > 0) {
+                                phraseList.currentTr = phraseList.currentTr.next();
+                            } else {
+                                return;
+                            }
+                            break;
+                        case 13://enter
+                            break;
+                        case 51://
+                            return true;
+                        default:
+                            return;
+                    }
+                    phraseList.currentTr.find('.eng-name').click();
+                });
+
+                $(document).on('keydown','#sch',function(e){
+
+
+                });
+
+                phraseList.currentTr = phraseList.allTr.first();
+                phraseList.currentTr.find('.eng-name').click();
+
+                $('.glyphicon-download').click(function () {
+                    var currentTr = $(this).closest('tr');
+                    var voiceObj = currentTr.find('.phrase-voice');
+                    var id = currentTr.find('.phrase-id').val();
+                    $.getJSON('{{ uri.router(null, 'voice') }}?id=' + id , function (json) {
+                        if (json.status == 0) {
+                            EngUtil.showMessage('{{ 'Voice updated'|trans }}', 2);
+                            voiceObj.val(json.data.voice);
+                            currentTr.find('.eng-name').click();
+                        } else if (json.status == 1){
+                            EngUtil.showAlert('{{ 'Voice update is failed!'|trans }}');
+                        } else {
+                            EngUtil.showAlert('{{ 'Unknow Error'|trans }}');
+                        }
+                    }).fail(function () {
+                        EngUtil.showAlert('{{ 'Request Server Error!'|trans }}');
+                    })
+                });
+            }
+        }
+        phraseList.init();
+    });
+</script>
+{% endblock %}

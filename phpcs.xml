@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<ruleset name="3SI">
+ <description>3SI's custom coding standard.</description>
+
+ <exclude-pattern>app/cache/*</exclude-pattern>
+ <exclude-pattern>*/vendor/*</exclude-pattern>
+ <exclude-pattern>*/Tests/*</exclude-pattern>
+ <exclude-pattern>src/pear_local/*</exclude-pattern>
+ <exclude-pattern>TrackerTool/*</exclude-pattern>
+ <exclude-pattern>web/*</exclude-pattern>
+ <exclude-pattern>*.js</exclude-pattern>
+ <exclude-pattern>*.ico</exclude-pattern>
+ <exclude-pattern>*.css</exclude-pattern>
+ <exclude-pattern>*.twig</exclude-pattern>
+
+ <!-- Include the whole PSR-2 standard -->
+ <rule ref="PSR2"/>
+
+ <!-- Include some sniffs from other standards that don't conflict with PSR2 -->
+ <rule ref="Squiz.Commenting.DocCommentAlignment" />
+
+ <!--
+   Ignore StudlyCaps for class names in loader controllers
+   So we can maybe someday use mcController and McController
+ -->
+ <rule ref="Squiz.Classes.ValidClassName">
+    <exclude-pattern>*/src/ESP/Loader/Controller/*</exclude-pattern>
+ </rule>
+
+</ruleset>

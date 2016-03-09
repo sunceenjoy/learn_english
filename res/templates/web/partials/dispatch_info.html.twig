@@ -1,0 +1,51 @@
+{% if group %}
+    <span class="anchor" title="{{ titleGroup }}" onclick="toggleVisibility('dispatch');">
+        {{ primaryDispatch }}
+
+    </span>
+{% else %}
+    {{ primaryDispatch }}
+{% endif %}
+
+{% if phone %}
+    <br />({{ phone }})
+{% endif %}
+
+{% if group %}
+    <div id="dispatch" style="display:none; width:239px;">
+        <ul style="margin:0; padding:0 0 0 12px;">
+            {#<li>Name: {{ group['name'] }}</li> removed in WEB-763#}
+            <li>Comments: {{ group['comments'] }}</li>
+            {#<li>Email: {{ group['email'] }}</li> removed in WEB-763#}
+            {#Beacons info updated with WEB-1654#}
+            <li>216 MHz Beacon Owner: {{ group['beacon_owners'] }}</li>
+            <li>Number of 216 MHz Beacons: {{ group['total_beacons'] }}</li>
+            <li>219 MHz Beacon Info: {{ group['beacon_info'] }}</li>
+            <li>Dispatch Phone: {{ group['dispatch_phone'] }}</li>
+            <li>Private Notes: {{ group['private_notes'] }}</li>
+        </ul>
+
+        {% if groupMembers %}
+            <div>Members in this Group:<br />
+                {% for member in groupMembers %}
+                    <p class="anchor"
+                       title="{{ titleMembers }}"
+                       onclick="toggleVisibility('member_{{ member['username'] }}');"
+                       style="margin:0; padding:0;">
+                        {{ member['username'] }}
+                    </p>
+                    <div style="display:none; width:239px;" id="member_{{ member['username'] }}">
+                        Name: {{ member['first_name'] }} {{ member['last_name'] }}<br />
+                        Email: {{ member['email'] }}<br />
+                        {#Contact Info: {{ member['contact_info'] }}<br /> removed in WEB-763#}
+                        Phone Number: {{ member['phone_number'] }}<br />
+                        Logout Alert: {{ (member['log_out_alert'] == 't') ? 'yes' : 'no' }}<br />
+                        Last Access: {{ member['last_access'] }}<br />
+                    </div>
+                {% endfor %}
+
+            </div>
+        {% endif %}
+
+    </div>
+{% endif %}

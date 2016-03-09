@@ -1,0 +1,392 @@
+{% extends "web/partials/main.html.twig" %}
+{% block css_block %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="/vendor/jquery-loadmask/jquery.loadmask.css"/>
+{% endblock %}
+{% block nav_form %}
+    <form class="navbar-form navbar-right">
+        <div class="form-group">
+            <input id="maxNumber" type="number" max="999" placeholder="{{ 'amount'|trans }}" class="form-control" value="">
+        </div>
+        <div class="form-group">
+            <div class="btn-group btn-group status-dropdown">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="status-text">{{ "easy" |trans|capitalize}}</span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" style="min-width:80px;">
+                <li><a href="#{{ constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::DIFFICULT') }}">{{ 'difficult' |trans|capitalize }}</a></li>
+                <li><a href="#{{ constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::MEDIUM') }}">{{ 'medium'|trans|capitalize }}</a></li>
+                <li><a href="#{{ constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::EASY') }}">{{ 'easy'|trans|capitalize }}</a></li>
+                <li><a href="#{{ constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::RARE') }}">{{ 'rare'|trans|capitalize }}</a></li>
+                <li><a href="#{{ constant('Eng\\Core\\Repository\\Entity\\PhrasesEntity::NEWONE') }}">{{ 'new'|trans|capitalize }}</a></li>
+                </ul>
+            </div>
+        </div>
+        <button type="button" class="btn btn-success" id="start-quiz">{{ 'Start Quiz'|trans }}</button>
+    </form>
+{% endblock %}
+
+{% block main_div %}
+
+    <div class="container">
+        <div class="jumbotron center" id="jumbotron">
+            <span id="pct"></span>
+            <div class="progress">
+                <div class="progress-bar progress-bar-success" role="progressbar"></div>
+            </div>
+           <h1 id="word" class="invisible">&nbsp</h1>
+           <div class="row" id="pron-div">
+               <span id="pronunciation" class="invisible">&nbsp</span>
+               <span id="eg" class="invisible"><a target="sentence" href="#">e.g.</a></span>
+           </div>
+           <p id="means" class="invisible">&nbsp</p>
+           <div class="row check-div">
+               <div class="col-xs-3" id="btn-voice"><span class="glyphicon glyphicon-volume-up hand" title="{{ "Voice"|trans }}"></span></div>
+               <div class="col-xs-3"><span class="glyphicon glyphicon-list-alt hand" title="{{ "Show word"|trans }}"></span></div>
+               <div class="col-xs-3"><span class="glyphicon glyphicon-step-backward hand" title="{{ "Previous"|trans }}"></span></div>
+               <div class="col-xs-3"><span class="glyphicon glyphicon-registration-mark none hand" title="{{ "Review failed words"|trans }}"></span></div>
+               <div class="col-xs-3"><span class="glyphicon glyphicon-download hand" title="{{ "Change voice"|trans }}"></span></div>
+            </div>
+           <div class="row" style="overflow: hidden" id="know-unknow">
+               <div class="col-xs-6" id="btn-know"><button type="button" class="btn-know btn btn-lg btn-default quiz-btn">{{ "Know"|trans }}</button></div>
+               <div class="col-xs-6" id="btn-unknow"><button type="button" class="btn-unknow btn btn-lg btn-default quiz-btn">{{ "Unknow"|trans }}</button></div>
+           </div>
+        </div>
+        <div class="bs-callout bs-callout-info" style="margin-top: -20px;">
+            <span class="title" title="{{ "Click to show or hide Words"|trans }}">Recap Words</span>
+            <h4 id="recap-words-list">
+
+            </h4>
+        </div>
+    </div>
+    <audio id="audio" style="display: none"></audio>
+{% endblock %}
+
+{% block main_js %}
+<script src="/vendor/jquery-loadmask/jquery.loadmask.min.js"></script>
+<script>
+var wordQuiz = {
+    items: {
+        pct: $('#pct'),
+        progress: $('.progress-bar'),
+        sound: $('.glyphicon-volume-up'),
+        showWord: $('.glyphicon-list-alt'),
+        previousWord: $('.glyphicon-step-backward'),
+        know: $('.btn-know'),
+        unknow: $('.btn-unknow'),
+        review: $('.glyphicon-registration-mark'),
+        word: $('#word'),
+        means: $('#means'),
+        audio: $('#audio'),
+        changeVoice: $('.glyphicon-download'),
+        pronunciation: $('#pronunciation'),
+        recapWords: $('#recap-words-list'),
+        recapWordsTitle: $('.title'),
+        eg: $('#eg')
+    },
+    params: {
+        level: 0, // Easy, medium, ...
+        maxNumber: 0,
+        quizStatus: 0, // 0 not start, 1 in quiz, 2 stopped, 3. review errors
+        words: [],
+        index: null,
+        display: 0, // 0 none, 1 word,  2 means, 3 All
+        audioUrl: null,
+        successWords: [],
+        failureWords: [],
+        voicePath: null,
+        category: null
+    },
+    init: function (category) {
+        this.params.category = category;
+        this.params.voicePath = '/voice/' + category;
+
+        if (this.params.category != 'words') {
+            this.items.eg.remove();
+            this.items.pronunciation.remove();
+        }
+
+        this.displayAll(this.params.display);
+
+        this.items.know.click((function () {
+            this.playSound(this.params.audioUrl);
+
+            if (this.displayAll(3)) {
+                return;
+            }
+
+            if (this.params.quizStatus == 1) {
+                this.updateQuizResult(1);
+            }
+
+            if (this.displayWord(this.params.index + 1) == false) {
+                // Over
+                this.stopQuiz();
+            }
+
+        }).bind(this));
+
+        this.items.unknow.click((function () {
+            this.playSound(this.params.audioUrl);
+
+            if (this.displayAll(3)) {
+                return;
+            }
+
+            if (this.params.quizStatus == 1) {
+                this.updateQuizResult(0);
+            }
+
+            if (this.displayWord(this.params.index + 1) == false) {
+                // Over
+                this.stopQuiz();
+            }
+
+        }).bind(this));
+
+        this.items.sound.click((function (){
+            this.playSound(this.params.audioUrl);
+        }).bind(this));
+        this.items.showWord.click((function (){
+            this.displayAll(3);
+            this.playSound(this.params.audioUrl);
+        }).bind(this));
+        this.items.previousWord.click((function (){
+            this.displayWord(this.params.index - 1, true);
+        }).bind(this));
+        this.items.review.click((function () {
+            if (this.params.failureWords.length > 0) {
+                this.reviewFailedWords();
+            }
+        }).bind(this));
+
+        $(document).keydown((function(e) {
+            if (this.params.quizStatus == 0) {
+                return;
+            }
+
+            switch (e.keyCode) {
+                case 49: // 1
+                    this.items.know.click();
+                    break;
+                case 50: // 2
+                    this.items.unknow.click();
+                    break;
+                case 51: // 3
+                    this.items.sound.click();
+                    break;
+            }
+        }).bind(this));
+
+        this.items.recapWordsTitle.click((function () {
+           this.items.recapWords.toggle();
+        }).bind(this));
+
+        this.items.changeVoice.click((function () {
+            var word = this.params.words[this.params.index];
+            $.getJSON('/' + this.params.category + '/voice?id=' + word.id , (function (json) {
+            if (json.status == 0) {
+                this.params.words[this.params.index].voice = json.data.voice;
+                this.params.audioUrl = json.data.voice;
+                this.items.sound.click();
+                EngUtil.showSuccessToast('{{ 'voice is updated'|trans }}');
+            } else if (json.status == 1) {
+                EngUtil.showErrorToast("{{ 'No more voice to download!'|trans }}");
+            } else {
+                alert('{{ 'Unknow error when getting new voice!'|trans}}');
+            }
+        }).bind(this)).always(function () {
+            $('#jumbotron').unmask();
+        }).fail(function () {
+            EngUtil.showErrorToast("{{ 'Sever Error!'|trans }}");
+        });
+        }).bind(this));
+
+        $(window).bind('beforeunload',function() {
+            if (wordQuiz.params.quizStatus != 0) {
+                return '{{ "You are in Quiz, do you want to leave?"|trans }}';
+            }
+        });
+        $('.status-dropdown a').on('click', function () {
+            $('.status-text').text(this.text);
+        });
+
+        $('#start-quiz').click(function () {
+            $('.navbar-form').submit();
+        });
+
+        $('.navbar-form').submit(function (){
+            var maxNumber = $('#maxNumber').focusout().val();
+
+            $('.status-dropdown a').each(function (i, item) {
+                if (this.text == $('.status-text').text()) {
+                    var level = this.href.replace(/.*#/, '');
+                    wordQuiz.params.level = level;
+                }
+            });
+            wordQuiz.startQuiz(wordQuiz.params.level, maxNumber, 0)
+            return false;
+        });
+
+        this.setStatus(this.params.quizStatus);
+    },
+    displayAll: function (type) {
+        var isSet = false;
+        if ((type == 2 || type == 3) && this.items.means.hasClass('invisible')) {
+            this.items.means.removeClass('invisible');
+            isSet = true;
+        } else if (type == 0) {
+            this.items.means.addClass('invisible');
+            isSet = true;
+        }
+
+        if ((type == 1 || type == 3) && this.items.word.hasClass('invisible')) {
+            this.items.word.removeClass('invisible');
+            this.items.pronunciation.removeClass('invisible');
+            this.items.eg.removeClass('invisible');
+            isSet = true;
+        } else if (type == 0) {
+            this.items.word.addClass('invisible');
+            this.items.pronunciation.addClass('invisible');
+            this.items.eg.addClass('invisible');
+            isSet = true;
+        }
+        return isSet;
+    },
+    startQuiz: function (level, number, displayType) {
+        this.params.display = displayType;
+        this.setStatus(0);
+        this.params.maxNumber = number;
+        this.params.index = null;
+        this.params.audioUrl = null;
+        this.params.failureWords = [];
+        this.params.successWords = [];
+        this.params.words = [];
+        this.items.pct.text('');
+        this.items.progress.css('width', '0%');
+        this.items.review.addClass('none');
+        this.items.know.prop('disabled', false);
+        this.items.unknow.prop('disabled', false);
+        this.items.previousWord.removeClass("none");
+
+        $('#jumbotron').mask('{{ 'Loading...'|trans }}');
+        $.getJSON('{{ uri.router(null, 'start') }}?status=' + level + '&numbers=' + this.params.maxNumber , (function (json) {
+            if (json.status == 0) {
+                this.params.words = json.items;
+                this.params.index = 0;
+                this.setStatus(1);
+                this.displayWord(this.params.index);
+                this.items.recapWords.html('');
+            } else if (json.status == 1) {
+                alert('{{ 'No words!'|trans}}');
+            } else {
+                alert('{{ 'quiz initilized error'|trans}}');
+            }
+        }).bind(this)).always(function () {
+            $('#jumbotron').unmask();
+        }).fail(function () {
+            EngUtil.showErrorToast("{{ 'Sever Error!'|trans }}");
+        });
+    },
+    stopQuiz: function () {
+        this.setStatus(2);
+        this.items.review.removeClass('none');
+        this.items.previousWord.addClass("none");
+        this.items.know.prop('disabled', true);
+        this.items.unknow.prop('disabled', true);
+
+        alert("{{'Quiz Stopped!'|trans }}")
+    },
+    displayWord: function (index, isRollback) {
+        isRollback = typeof isRollback == 'undefined' ? false : isRollback;
+        if (index < 0 || index >= this.params.words.length) {
+            return false;
+        }
+
+        this.params.index = index;
+        var word = this.params.words[this.params.index];
+        this.items.word.html('<a target="youdao-word" href="http://dict.youdao.com/search?q=' + word.name + '">' + word.name + '</a>');
+        this.items.pronunciation.html('['+ word.pronunciation + ']');
+        this.items.means.text(word.means);
+        this.items.eg.find('a').prop('href', 'https://www.voicetube.com/definition/' + word.name);
+        this.params.audioUrl = word.voice;
+
+        word.isRollback = isRollback;
+
+        // render
+        this.items.pct.text((this.params.index + 1) + '/' + this.params.words.length);
+        this.items.progress.css('width', parseInt((this.params.index + 1) * 100 / this.params.words.length) + '%');
+
+        this.displayAll(0);
+        this.playSound(this.params.audioUrl);
+
+        return true;
+    },
+    updateQuizResult: function (success) {
+        var word = this.params.words[this.params.index];
+        if (word.isRollback) { // 复查
+            return;
+        }
+
+        $.getJSON('{{ uri.router(null, 'update') }}?is_success=' + success + '&id=' + word.id + '&status=' + this.params.level , (function (json) {
+            if (json.status == 0) {
+
+            } else {
+                alert(json.errorMessage);
+            }
+        }).bind(this)).fail(function () {
+            EngUtil.showErrorToast("{{ 'Sever Error!'|trans }}");
+        });
+
+        if (success) {
+            this.params.successWords.push(word);
+        } else {
+            this.params.failureWords.push(word);
+            $('<a class="btn btn-sm btn-info" role="button" href="http://dict.youdao.com/search?q=' + word.name + '&keyfrom=dict.index" target="recap_word">' + word.name + '</a>').appendTo(this.items.recapWords);
+        }
+    },
+    reviewFailedWords: function () {
+        this.setStatus(3);
+        this.params.MaxNumber = this.params.failureWords.length;
+        this.params.index = 0;
+        this.params.audioUrl = null;
+        this.params.words = this.params.failureWords;
+        this.items.pct.text('');
+        this.items.progress.css('width', '0%');
+        this.items.review.addClass('none');
+        this.items.know.prop('disabled', false);
+        this.items.unknow.prop('disabled', false);
+        this.items.previousWord.removeClass("none");
+        this.items.recapWords.html('');
+        this.displayWord(this.params.index);
+    },
+    playSound: function (audioUrl) {
+        this.items.audio.attr('src', this.params.voicePath + '/' + audioUrl);
+        this.items.audio[0].volume = 1;
+        this.items.audio[0].play();
+    },
+    setStatus: function (quizStatus) {
+        this.params.quizStatus = quizStatus;
+        switch (quizStatus) {
+            case 0:
+                $('#jumbotron').mask();
+                $('#start-quiz').prop('disabled', false);
+                break;
+            case 1:
+                $('#jumbotron').unmask();
+                $('#start-quiz').prop('disabled', true);
+                break;
+            case 2:
+                $('#jumbotron').unmask();
+                $('#start-quiz').prop('disabled', false);
+                break;
+            case 3:
+                $('#jumbotron').unmask();
+                $('#start-quiz').prop('disabled', true);
+                break;
+        }
+    }
+};
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "web/partials/main.html.twig" %}
+{% block css_block %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="/vendor/jquery-loadmask/jquery.loadmask.css"/>
+{% endblock %}
+{% block main_div %}
+    <div class="container">
+        <div id="add-new" class="bs-callout bs-callout-info new-word-div">
+            <form>
+                <div class="form-group">
+                  <textarea id="new" style="width:98%" placeholder="单词请用空格, 换行, tab分割;
+短语则一行一个 中文英文放同一行" rows="10"></textarea>
+                </div>
+                <button id="add-word" type="button" class="btn btn-sm btn-default">{{ "Add Word"|trans }}</button>
+                <button id="add-phrase" type="button" class="btn btn-sm btn-default">{{ "Add Phrase"|trans }}</button>
+                <button id="add-pronunciation" type="button" class="btn btn-sm btn-default">{{ "Add pronunciation"|trans }}</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block main_js %}
+<script src="/vendor/jquery-loadmask/jquery.loadmask.min.js"></script>
+<script>
+    $(function () {
+        var submitForm = function (type) {
+            var text = $('#new').val();
+            if (text.length == 0) {
+                return;
+            }
+            $('#jumbotron').mask('{{ 'Loading...'|trans }}');
+            var cArray = {c1: 'Words', c2: 'Phrases', c3: 'Prons'};
+            $('#add-new').mask('{{ 'Processing'|trans }}...');
+            $.ajax({
+                url: '/' + cArray['c' + type] + '/addNew',
+                method: "POST",
+                data: {key_type: type, 'key': text},
+                dataType: "json"
+            }).done(function(json) {
+                if (json.status == 0) {
+                    EngUtil.showSuccessToast(json.message, function () {
+                        $('#new').val(json.errorWords);
+                    });
+                } else {
+                    EngUtil.showErrorToast(json.message, function () {
+                        $('#new').val(json.errorWords);
+                    });
+                }
+            }).fail(function() {
+                EngUtil.showErrorToast("{{ 'Failed to Add!'|trans }}");
+            }).always(function () {
+                $('#add-new').unmask();
+            });
+
+        };
+        $('#add-word').click(function () {
+            submitForm(1);
+        });
+        $('#add-phrase').click(function () {
+            submitForm(2);
+        });
+        $('#add-pronunciation').click(function () {
+            submitForm(3);
+        });
+    });
+</script>
+{% endblock %}

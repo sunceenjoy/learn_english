@@ -1,0 +1,67 @@
+html, body {height: 100%;}
+body {
+  padding-top: 50px;
+}
+@media screen and (min-width:1200px) and (max-width:860px) {
+    body {padding-top:50px;}
+}
+@media screen and (min-width:768px) and (max-width:1199px) {
+    body {padding-top:100px;}
+}
+@media screen and (max-width:767px) {
+    body {padding-top:50px;}
+    #jumbotron {position: relative;}
+    #btn-know, #btn-unknow {right: 0px; position: absolute;display: block; float:none; width:140px;}
+    #btn-know {top: 10%;}
+    #btn-unknow {bottom: 10%;}
+    #btn-voice {position: absolute; right:-30px; top:45%;}
+}
+a:hover {text-decoration:none}
+
+.center {text-align: center;}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+.hand {cursor: pointer;}
+.green {color: green;}
+.eng-page {margin:0;}
+.none { display:none}
+.eng-table>tbody>tr>td,.eng-table>tbody>tr>th {padding: 5px; vertical-align: middle; position: relative;}
+.td-highlight {background: #99cb84;}
+.td-highlight>div {color: white; visibility: visible;}
+
+.means-edit-div, .item-edit-div {position: absolute; right:5px; bottom:2px;}
+.quiz-container {background:#eeeee; height:250px;}
+#jumbotron {padding-top:15px; position:relative;}
+#pct {position: absolute; right: 8px;}
+.quiz-btn {width: 100%}
+.check-div {margin-left: 35%;margin-right: 35%; margin-bottom:5px;}
+#pron-div span {font-size:18px;padding-bottom: 5px;font-weight: 500; line-height: 1.1;}
+#eg {margin-left: 10px;}
+.bs-callout {
+    padding: 5px;
+    border: 1px solid #eee;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top:4px;
+}
+.bs-callout .title {color: #ccc; cursor: pointer;}
+#recap-words-list a {margin-right: 8px;}
+
+/*
+http://stackoverflow.com/questions/8878033/how-to-make-twitter-bootstrap-menu-dropdown-on-hover-rather-than-click
+*/
+.dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; // remove the gap so it doesn't close
+ }
+/* style.css
+* {
+   font-size: 16px;
+   line-height: 2;
+}
+*/
+
+.chart-tooltip {padding:10px;font-size: 14px; width: 150px;}
+.chart-tooltip span {font-weight:bold;}
