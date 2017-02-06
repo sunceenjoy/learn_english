@@ -2,13 +2,13 @@
 
 namespace Eng\Core;
 
-use Doctrine\Common\Inflector\Inflector;
 use Eng\Core\Container;
+use Eng\Core\Event\ControllerEvent;
+use Doctrine\Common\Inflector\Inflector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Route;
-use Eng\Core\Event\ControllerEvent;
 
 /**
  * This can be considered the kernel of English's newer MVC web application.
@@ -28,10 +28,14 @@ class Application implements HttpKernelInterface
      */
     protected $container;
 
+    /** @var \Eng\Core\Security\Auth $auth */
+    protected $auth;
+    
     public function __construct($bundle, Container $container)
     {
         $this->bundle = $bundle;
         $this->container = $container;
+        $this->auth = $container['auth'];
     }
 
     /** @var \Eng\Core\Event[] $events */
@@ -43,11 +47,18 @@ class Application implements HttpKernelInterface
     public function handle(Request $request, $type = self::MASTER_REQUEST, $catch = true)
     {
         $this->addEvents();
-
+        
         try {
             $parameters = $this->route();
-            list($controller, $action) = $this->resolveController($parameters);
 
+            if (!(isset($parameters['_controller']) && strpos($parameters['_controller'], 'Eng\Web\Controller\AuthController') === 0)) {
+                if (!$this->container['auth']->isAuthenticated()) {
+                    return new RedirectResponse('/login');
+                }
+            }
+            
+            list($controller, $action) = $this->resolveController($parameters);
+                        
             // Add route parameters to the request
             $request->attributes->add($parameters);
             unset($parameters['_route']);
@@ -61,18 +72,17 @@ class Application implements HttpKernelInterface
                 throw $e;
             }
         }
-
+        
         $this->container['dispather']->dispatch(ControllerEvent::PRE_ACTION);
 
         if (($response = $controller->getResponse()) !== null) {
             return $response;
         }
 
-        $controller->setResponse($controller->$action());
+        $controller->setResponse($controller->$action($this->container['request']));
         $this->container['dispather']->dispatch(ControllerEvent::POST_ACTION);
 
         return $controller->getResponse();
-
     }
 
     protected function route()
@@ -156,6 +166,5 @@ class Application implements HttpKernelInterface
 
     public function addEvents()
     {
-        $this->events['controllerEvent'] = new Event\ControllerEvent($this->container);
     }
 }

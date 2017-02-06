@@ -19,6 +19,7 @@ $c['config'] = function ($c) {
     $configArray = array_merge($appIni['default'], $envIni['default']);
     return new \Eng\Core\Config($configArray);
 };
+
 $c['log.main'] = function ($c) {
     $logger = new \Monolog\Logger('main');
     $level  = $c['config']['debug'] ? \Monolog\Logger::DEBUG : \Monolog\Logger::INFO;
@@ -97,6 +98,8 @@ $c['twig'] = function ($c) {
     $twig->addGlobal('config', $c['config']); // Global variables in twig:  {{ config.attribute }}
     $twig->addGlobal('env', $c['env']);
     $twig->addGlobal('uri', $c['util.uri']);
+    $twig->addGlobal('session', $c['session']);
+    $twig->addGlobal('request', $c['request']);
     return $twig;
 };
 
@@ -184,6 +187,23 @@ $c['entity.serializer'] = function ($c) {
     $normalizers = array(new Symfony\Component\Serializer\Normalizer\ObjectNormalizer());
 
     return $serializer = new Symfony\Component\Serializer\Serializer($normalizers, $encoders);
+};
+
+$c['session'] = function () {
+    return new Symfony\Component\HttpFoundation\Session\Session();
+};
+
+$c['dao_authentication_provider'] = function ($c) {
+    $userProvider = new Eng\Core\Security\Provider\DaoUserProvider($c['doctrine.entity_manager']->getRepository('Eng:UserEntity'));
+    $userChecker = new Symfony\Component\Security\Core\User\UserChecker();
+    $providerKey = 'mmyyabb';
+    $encoder = new Symfony\Component\Security\Core\Encoder\BCryptPasswordEncoder(15);
+    $encoderFactory = new Symfony\Component\Security\Core\Encoder\EncoderFactory([\Symfony\Component\Security\Core\User\User::class => $encoder]);
+    return new Symfony\Component\Security\Core\Authentication\Provider\DaoAuthenticationProvider($userProvider, $userChecker, $providerKey, $encoderFactory);
+};
+
+$c['auth'] = function ($c) {
+    return new Eng\Core\Security\Auth($c['session'], $c['dao_authentication_provider']);
 };
 
 \Eng\Core\ErrorHandler::register($c['env'], $c['mailer'], $c['config']['debug']);
