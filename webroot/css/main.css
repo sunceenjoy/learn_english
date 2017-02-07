@@ -54,7 +54,7 @@ http://stackoverflow.com/questions/8878033/how-to-make-twitter-bootstrap-menu-dr
 */
 .dropdown:hover .dropdown-menu {
     display: block;
-    margin-top: 0; // remove the gap so it doesn't close
+    margin-top: 0; /* remove the gap so it doesn't close */
  }
 /* style.css
 * {
@@ -63,5 +63,11 @@ http://stackoverflow.com/questions/8878033/how-to-make-twitter-bootstrap-menu-dr
 }
 */
 
+#donation {
+    position:fixed;
+    right:100px;
+    top:15px;
+    z-index:2000;
+}
 .chart-tooltip {padding:10px;font-size: 14px; width: 150px;}
 .chart-tooltip span {font-weight:bold;}
