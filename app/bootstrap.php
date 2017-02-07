@@ -10,6 +10,9 @@ $c['log_dir'] = $c['res_dir'].'/logs';
 $c['voice_save_path'] = DOCROOT.'/webroot/voice';
 
 $c['env'] = function ($c) {
+    if ($c['session']->get('isTester')) {
+        return new \Eng\Core\Environment('eng_dev');
+    }
     return new \Eng\Core\Environment(getenv('ENG_ENV'));
 };
 

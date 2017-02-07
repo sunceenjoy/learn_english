@@ -23,12 +23,14 @@ class AuthController extends BaseController
         }
         
         $this->session->getFlashBag()->add('error', 'Invalid username or password!');
+        $this->session->set('isTester', true);
         return new RedirectResponse('/login');
     }
     
     public function logout()
     {
         $this->c['auth']->earseAuthenticatedUser();
+        $this->session->remove('isTester');
         return new RedirectResponse('/login');
     }
 }
