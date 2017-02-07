@@ -24,7 +24,6 @@ class AuthController extends BaseController
         }
         
         $this->session->getFlashBag()->add('error', 'Invalid username or password!');
-        $this->session->set('isTester', true);
         return new RedirectResponse('/login');
     }
     
