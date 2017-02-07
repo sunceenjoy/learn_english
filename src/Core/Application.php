@@ -7,6 +7,7 @@ use Eng\Core\Event\ControllerEvent;
 use Doctrine\Common\Inflector\Inflector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Route;
 
