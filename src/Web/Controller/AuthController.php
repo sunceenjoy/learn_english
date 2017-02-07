@@ -19,6 +19,7 @@ class AuthController extends BaseController
     public function postLogin(Request $request)
     {
         if ($this->c['auth']->handle($request)) {
+            $this->session->set('isTester', true);
             return new RedirectResponse('/');
         }
         
@@ -29,6 +30,7 @@ class AuthController extends BaseController
     public function logout()
     {
         $this->c['auth']->earseAuthenticatedUser();
+        $this->session->remove('isTester');
         return new RedirectResponse('/login');
     }
 }
