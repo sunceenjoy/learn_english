@@ -69,7 +69,7 @@ class Auth
     
     private function setAuthenticatedUserByUsername($user)
     {
-        $this->authenticatedUser = new AuthenticatedUser($user, '', $this->providerKey, ['admin']);
+        $this->authenticatedUser = new AuthenticatedUser($user, '', $this->providerKey, $user->getRoles());
     }
     
     public function getAuthenticatedUser()

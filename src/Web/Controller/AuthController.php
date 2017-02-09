@@ -19,7 +19,9 @@ class AuthController extends BaseController
     public function postLogin(Request $request)
     {
         if ($this->c['auth']->handle($request)) {
-            $this->session->set('isTester', true);
+            if ($this->c['auth']->getAuthenticatedUser()->isTester()) {
+                $this->session->set('isTester', true);
+            }
             return new RedirectResponse('/');
         }
         

@@ -10,13 +10,23 @@ class AuthenticatedUser extends UsernamePasswordToken
         parent::__construct($user, $credentials, $providerKey, $roles);
     }
     
+    private function hasRole($roleName)
+    {
+        foreach ($this->getRoles() as $role) {
+            if ($roleName === $role->getRole()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function isSuperUser()
     {
-        return in_array('super_user', $this->getRoles());
+        return $this->hasRole('super_user');
     }
     
     public function isTester()
     {
-        return in_array('tester', $this->getRoles());
+        return $this->hasRole('tester');
     }
 }
