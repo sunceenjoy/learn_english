@@ -193,7 +193,7 @@ $c['entity.serializer'] = function ($c) {
 };
 
 $c['session'] = function () {
-    return new Symfony\Component\HttpFoundation\Session\Session();
+    return new Symfony\Component\HttpFoundation\Session\Session(new Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage(['cookie_lifetime' => 3600 * 24]));
 };
 
 $c['dao_authentication_provider'] = function ($c) {
