@@ -22,7 +22,7 @@ class AuthController extends BaseController
             if ($this->c['auth']->getAuthenticatedUser()->isTester()) {
                 $this->session->set('isTester', true);
             }
-            return new RedirectResponse('/');
+            return new RedirectResponse('/Words/newWord');
         }
         
         $this->session->getFlashBag()->add('error', 'Invalid username or password!');
