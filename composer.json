@@ -20,7 +20,7 @@
     },
     "require-dev": {
         "phpmd/phpmd": "1.4.*",
-        "phpunit/phpunit": "~4.0",
+        "phpunit/phpunit": "5.7.*",
         "squizlabs/php_codesniffer": "~2.3",
         "symfony/var-dumper": "~2.6"
     },

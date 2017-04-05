@@ -62,7 +62,7 @@ class Quiz
         }
     }
 
-    private function getNextStatusWhenSuccess($status)
+    public function getNextStatusWhenSuccess($status)
     {
         if ($status == PhrasesEntity::MEDIUM) {
             return PhrasesEntity::EASY;
