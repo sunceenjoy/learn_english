@@ -9,6 +9,14 @@ $c['app_dir'] = DOCROOT.'/app';
 $c['log_dir'] = $c['res_dir'].'/logs';
 $c['voice_save_path'] = DOCROOT.'/webroot/voice';
 
+$c['session'] = function () {
+    $params = [
+        'gc_maxlifetime' => 3600 * 24 * 10,
+        'cookie_lifetime' => 3600 * 24 * 10
+    ];
+    return new Symfony\Component\HttpFoundation\Session\Session(new Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage($params));
+};
+
 $c['env'] = function ($c) {
     if ($c['session']->get('isTester')) {
         return new \Eng\Core\Environment('eng_dev');
@@ -165,6 +173,7 @@ $c['phraseVoiceDownloader'] = function ($c) {
     $phraseVoiceDownloader = new \Eng\Core\Module\Phrases\Voice\VoiceDownloader($c['log.main'], $c['voice_save_path'].'/phrases');
     $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\NaturalReaders());
     $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\JinShan());
+    $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\GoogleTranslation(null, $c['config']['google_api_key']));
     return $phraseVoiceDownloader;
 };
 
@@ -190,14 +199,6 @@ $c['entity.serializer'] = function ($c) {
     $normalizers = array(new Symfony\Component\Serializer\Normalizer\ObjectNormalizer());
 
     return $serializer = new Symfony\Component\Serializer\Serializer($normalizers, $encoders);
-};
-
-$c['session'] = function () {
-    $params = [
-        'gc_maxlifetime' => 3600 * 24 * 10,
-        'cookie_lifetime' => 3600 * 24 * 10
-    ];
-    return new Symfony\Component\HttpFoundation\Session\Session(new Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage($params));
 };
 
 $c['dao_authentication_provider'] = function ($c) {

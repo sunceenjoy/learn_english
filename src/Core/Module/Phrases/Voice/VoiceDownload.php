@@ -17,7 +17,7 @@ abstract class VoiceDownload
 
     public function getTmpName()
     {
-        return tempnam($this->savePath, 'words');
+        return tempnam($this->savePath, 'phrases');
     }
 
     public function download($url, $savePath)
