@@ -98,7 +98,7 @@ class VoiceManager extends EngCommand
             $sql .= ' AND name = :name';
             $params['name'] = $name;
         }
-		$sql .= " AND voice not like '%/%'";
+//		$sql .= " AND voice not like '%/%'";
         $handle = $this->db->executeQuery($sql, $params);
         while ($row = $handle->fetch()) {
             $entity = new WordsEntity();
@@ -133,7 +133,7 @@ class VoiceManager extends EngCommand
             $sql .= ' AND name = :name';
             $params['name'] = $name;
         }
-		$sql .= " AND voice not like '%/%'";
+//		$sql .= " AND voice not like '%/%'";
         $handle = $this->db->executeQuery($sql, $params);
         while ($row = $handle->fetch()) {
             $entity = new PhrasesEntity();
@@ -173,7 +173,7 @@ class VoiceManager extends EngCommand
             $sql .= ' AND name = :name';
             $params['name'] = $name;
         }
-		$sql .= " AND voice not like '%/%'";
+//		$sql .= " AND voice not like '%/%'";
         $handle = $this->db->executeQuery($sql, $params);
         while ($row = $handle->fetch()) {
             $entity = new PronEntity();

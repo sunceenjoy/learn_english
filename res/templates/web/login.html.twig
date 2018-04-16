@@ -1,0 +1,86 @@
+{% extends "web/partials/main.html.twig" %}
+{% block css_block %}
+    {{ parent() }}
+    <link href='http://fonts.googleapis.com/css?family=Raleway:500' rel='stylesheet' type='text/css'>
+    <style>
+        body {
+            background: -webkit-linear-gradient(90deg, #16222A 10%, #3A6073 90%); /* Chrome 10+, Saf5.1+ */
+            background:    -moz-linear-gradient(90deg, #16222A 10%, #3A6073 90%); /* FF3.6+ */
+            background:     -ms-linear-gradient(90deg, #16222A 10%, #3A6073 90%); /* IE10 */
+            background:      -o-linear-gradient(90deg, #16222A 10%, #3A6073 90%); /* Opera 11.10+ */
+            background:         linear-gradient(90deg, #16222A 10%, #3A6073 90%); /* W3C */
+            font-family: 'Raleway', sans-serif;
+        }
+        p {
+            color:#CCC;
+        }
+        .spacing {
+            padding-top:7px;
+            padding-bottom:7px;
+            text-align:right;
+        }
+        .middle-page {
+            max-width: 680px;
+            max-height: 500px;
+            margin:90px auto 0px auto;
+        }
+
+        .logo {
+            color:#CCC;
+        }
+    </style>
+{% endblock %}
+{% block nav_form %}
+{% endblock %}
+
+{% block main_div %}
+
+    <div class="middle-page">
+        <div class="page-header">
+            <h1 class="logo">Happy English <small>English Learning is so easy!</small></h1>
+        </div>
+
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">Please Sign In</h3>
+            </div>
+            <div class="panel-body">
+
+                <div class="row">
+
+                    <div class="col-md-5">
+                     <!--   <a href="#"><img src="http://techulus.com/buttons/fb.png" /></a><br/>
+                        <a href="#"><img src="http://techulus.com/buttons/tw.png" /></a><br/>
+                        <a href="#"><img src="http://techulus.com/buttons/gplus.png" /></a>
+                     -->
+                     Test Account:<br>
+                     Username: test<br>
+                     Password: 123456<br><br>
+                     Source code: <a href="https://github.com/sunceenjoy/learn_english/tree/developer">github</a>
+                    </div>
+
+                    <div class="col-md-7" style="border-left:1px solid #ccc;height:160px">
+                        <form class="form-horizontal" method="post" action="/post-login">
+                            <fieldset>
+
+                                <input id="textinput" name="username" type="text" placeholder="Enter User Name" class="form-control input-md">
+                                <div class="spacing"></div>
+                                <input id="textinput" name="password" type="password" placeholder="Enter Password" class="form-control input-md">
+                                <div class="spacing"><input type="submit" value="Sign In" class="btn btn-info btn-sm"></div>
+                                    {% for flashMessage in session.flashBag.get('error') %}
+                                    <div style="padding:5px;margin-top:4px;" class="alert alert-danger small">
+                                        {{ flashMessage }}
+                                    </div>
+                                {% endfor %}
+                            </fieldset>
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}

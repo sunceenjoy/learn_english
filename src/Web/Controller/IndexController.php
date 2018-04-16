@@ -11,8 +11,6 @@ class IndexController extends BaseController
 {
     public function index()
     {
-        $arr = $this->db->fetchArray("select * from words");
-        print_r($arr);die;
     }
 
     public function getAction()

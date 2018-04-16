@@ -1,4 +1,5 @@
 <?php
+
 namespace Eng\Web\Controller;
 
 use Eng\Core\Container;
@@ -23,6 +24,9 @@ abstract class BaseController
 
     protected $log = null;
 
+    /** @var \Eng\Core\Security\AuthenticatedUser $authUser; */
+    protected $authUser = null;
+    
     public function __construct(Container $container, $title = '')
     {
         $this->c = $this->container = $container;
@@ -30,7 +34,8 @@ abstract class BaseController
         $this->db = $this->container['db.eng'];
         $this->em = $this->container['doctrine.entity_manager'];
         $this->log = $this->container['log.main'];
-
+        $this->session = $this->container['session'];
+        
         $this->container['dispather']->addListener(ControllerEvent::PRE_ACTION, array($this, 'preAction'));
         $this->container['dispather']->addListener(ControllerEvent::POST_ACTION, array($this, 'postAction'));
     }
@@ -78,7 +83,6 @@ abstract class BaseController
      */
     protected function initialize()
     {
-
     }
 
     /**
@@ -86,7 +90,7 @@ abstract class BaseController
      */
     public function preAction()
     {
-
+        $this->c['twig']->addGlobal('authUser', $this->c['auth']->getAuthenticatedUser());
     }
 
     public function setResponse($response)

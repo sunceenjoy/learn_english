@@ -39,7 +39,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="#">Project name</a>
+                        <a class="navbar-brand" href="#">Happy English</a>
                     </div>
                     <div id="navbar" class="collapse navbar-collapse">
                         <ul class="nav navbar-nav">
@@ -64,30 +64,38 @@
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'Pronunciation'|trans }} <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="/prons/list">{{ 'List'|trans }}</a></li>
-                                    <li><a href="/prons/quiz">{{ 'Quiz'|trans }}</a></li>
+                                    <!--li><a href="/prons/quiz">{{ 'Quiz'|trans }}</a></li-->
                                 </ul>
                             </li>
                             <li><a href="{{ uri.router('Words', 'newWord') }}">Add New</a></li>
                         </ul>
 
                         {% block nav_form %}
-                        <form class="navbar-form navbar-right">
-                            <div class="form-group">
-                                <input type="text" placeholder="Email" class="form-control">
+                            <div style="float:right; margin-top:15px; color:white">
+                            {% if authUser %}
+                                <span>Hi, {{authUser.username}}</span> | <a href="/logout">logout</a>
+                            {% else %}
+                                <span> Hi, visitor</span>
+                            {% endif %}
                             </div>
-                            <div class="form-group">
-                                <input type="password" placeholder="Password" class="form-control">
-                            </div>
-                            <button type="submit" class="btn btn-success">Sign in</button>
-                        </form>
                         {% endblock %}
                     </div><!--/.nav-collapse -->
                 </div>
-
             </nav>
 
 
             {% block main_div %}
+            {% endblock %}
+            
+            {% block donation %}
+                <div id="donation">
+                    <form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                        <input type="hidden" name="cmd" value="_s-xclick">
+                        <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
+                        <input type="image" src="https://www.sandbox.paypal.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                        <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                    </form>
+                </div>
             {% endblock %}
 
             <!-- Placed at the end of the document so the pages load faster -->

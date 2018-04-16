@@ -85,4 +85,28 @@ $collection->add(
     )
 );
 
+$collection->add(
+    'login',
+    new Route(
+        '/login',
+        array('_controller' => 'Eng\Web\Controller\AuthController::login',)
+    )
+);
+
+$collection->add(
+    'post-login',
+    new Route(
+        '/post-login',
+        array('_controller' => 'Eng\Web\Controller\AuthController::postLogin',)
+    )
+);
+
+$collection->add(
+    'logout',
+    new Route(
+        '/logout',
+        array('_controller' => 'Eng\Web\Controller\AuthController::logout',)
+    )
+);
+
 return $collection;
