@@ -31,7 +31,7 @@
 var stockDataManage = {
 	stockData : [],
 	stockNames: [],
-	baseUrl: 'http://hq.sinajs.cn',
+	baseUrl: 'https://hq.sinajs.cn',
 	callback: null,
 	retrieveData: function (callback) {
             var requestUrl = this.baseUrl + '/?_t=' + (new Date).getTime() + '&list=' + this.stockNames.join(',');
