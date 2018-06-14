@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Hello World</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <style>
+            .calculator input {
+                width: 60px;
+                margin-right: 5px;
+            }
+            .calculator .calculator-select {
+                line-height: 26px;
+                height: 26px;
+                margin-right:5px;
+            }
+            body {
+                font-size: 12px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="stock-list"></div>
+    </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://unpkg.com/react@16.0.0/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@16.0.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+<script>
+var stockDataManage = {
+	stockData : [],
+	stockNames: [],
+	baseUrl: 'http://hq.sinajs.cn',
+	callback: null,
+	retrieveData: function (callback) {
+            var requestUrl = this.baseUrl + '/?_t=' + (new Date).getTime() + '&list=' + this.stockNames.join(',');
+            var _this = this;
+            $.ajax({
+                    type: 'GET',
+                    url: requestUrl,
+                    async: false,
+                    jsonp : true,
+                    dataType: 'script',
+                    cache: true, /* disable _t parameter */
+                    success: (function(data) {
+                            this.stockData = [];
+                            for (var idx in this.stockNames ) {
+                                    var name = this.stockNames[idx];
+                                    eval('var stockInfo = hq_str_' + name + ';');
+                                    if (name == 'hf_CL') {
+                                            this.stockData.push(this.parseCrude(name, stockInfo));
+                                    } else {
+                                            this.stockData.push(this.parseETF(name, stockInfo));
+                                    }
+                            }
+                            callback(this.stockData);
+                    }).bind(_this)
+            });
+	},
+	parseCrude: function (name, crudeInfo) {
+            /* 0 price, 1 price change, 2 buy price, 3 sale price, 4, highest price, 5 lowest price, 6 end time, 7 yesterday's price, 8 opening price, 9, 10, 11, 12, 13 name */
+            crudeInfo = crudeInfo.split(',');
+            var json = {};
+            json.price = crudeInfo[0];
+            json.yesterdayPrice = crudeInfo[7];
+            json.name = name;
+            return json;
+	},
+	parseETF: function (name, etfInfo) {
+            /* 0 name, 1 price, 2 pecentage, 3 timestamp, 4 price change, 5 openning price, 6 highest price, 7 lowest price, 8 height price(52 week), 9 lowest price(52week), ... 26 yesterdayPrice, */
+            etfInfo = etfInfo.split(',');
+            var json = {};
+            json.price = etfInfo[1];
+            json.yesterdayPrice = etfInfo[26];
+            json.name = name;
+            return json;
+	}
+};
+</script>
+
+<script type="text/babel">
+function Percent(props)
+{
+    const p1 = parseFloat(props.price);
+    const p2 = parseFloat(props.yesterdayPrice);
+    const percent = ((p1 - p2) * 100 / p2).toFixed(2);
+    return (
+        <span>{percent}%</span>
+    )
+}
+
+function Header()
+{
+    return (
+        <h1></h1>
+    );
+}
+
+class StockRow extends React.Component {
+  render() {
+    return (<tr>
+        <td>{this.props.name}</td>
+        <td>{this.props.price}</td>
+        <td><Percent price={this.props.price} yesterdayPrice={this.props.yesterdayPrice}/></td>
+	<td>{this.props.extra}</td>
+      </tr>);
+  }
+}
+
+class EtfCalculator extends React.Component {
+    constructor(props) {
+        super(props);
+        this.stockChange = this.stockChange.bind(this);
+        this.crudeValueChange = this.crudeValueChange.bind(this);
+        this.etfValueChange = this.etfValueChange.bind(this);
+        this.state = {crudeValue: null, etfValue: null, symbol:this.props.leverage[0].symbol, type: null};
+    }
+
+    stockChange(event) {
+        this.setState({symbol: $(event.target).val()});
+    }
+
+    crudeValueChange(event) {
+        this.setState({crudeValue: event.target.value, type: 'c2e'});
+    }
+
+    etfValueChange(event) {
+        this.setState({etfValue: event.target.value, type: 'e2c'});
+    }
+
+    getLeverageBySymbol(symbol) {
+        for(var i = 0; i< this.props.leverage.length; i++) {
+            var l = this.props.leverage[i];
+            if (symbol == l.symbol) {
+                return l
+            }
+        }
+        return 1;
+    }
+
+    render() {
+        if (this.state.type == 'c2e') {
+            var leverage = this.getLeverageBySymbol(this.state.symbol);
+            var precent = (this.state.crudeValue - this.props.stocks.hf_CL.price) / this.props.stocks.hf_CL.yesterdayPrice;// precent is relative to current price.
+            var crudeValue = this.state.crudeValue;
+            var etfValue = parseFloat(this.props.stocks[this.state.symbol].price) + parseFloat(this.props.stocks[this.state.symbol].yesterdayPrice * (precent * leverage.leverage));
+            etfValue = etfValue.toFixed(2);
+        } else if (this.state.type == 'e2c') {
+            var leverage = this.getLeverageBySymbol(this.state.symbol);
+            var precent = (this.state.etfValue - this.props.stocks[this.state.symbol].price) / this.props.stocks[this.state.symbol].yesterdayPrice;
+            var crudeValue = parseFloat(this.props.stocks.hf_CL.price) +  parseFloat(this.props.stocks.hf_CL.yesterdayPrice * (precent / leverage.leverage));
+            crudeValue = crudeValue.toFixed(2);
+            var etfValue = this.state.etfValue;
+        } else {
+            var crudeValue = this.props.stocks.hf_CL.price;
+            var etfValue = '';
+        }
+
+        var options = [];
+        this.props.leverage.forEach((stock) => {
+            options.push(<option key={stock.symbol} value={stock.symbol}>{stock.name}</option>);
+        });
+
+        return (
+            <div className="calculator">
+                <input type="text" placeholder=" crude" onChange={this.crudeValueChange} value={crudeValue} />
+                <select className="calculator-select" onChange={this.stockChange}>
+                    {options}
+                </select>
+                <input type="text" placeholder=" etf" onChange={this.etfValueChange} value={etfValue}/>
+            </div>
+        );
+    }
+}
+
+class StockTable extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {stocks: props.stocks};
+    }
+
+    componentDidMount() {
+        var func = function () {
+            stockDataManage.retrieveData((function (stocks) {
+                this.setState({stocks: stocks});
+            }).bind(this));
+        };
+        this.timerID = setInterval(func.bind(this), 4000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timerID);
+    }
+
+    render() {
+        var rows = [];
+        var etfJson = {};
+        this.state.stocks.forEach((stock) => {
+            etfJson[stock.name] = stock;
+            if (stock.name == 'hf_CL') {
+                return;
+            }
+            rows.push(<StockRow key={stock.name} name={stock.name} price={stock.price} yesterdayPrice={stock.yesterdayPrice} />);
+        });
+        if (this.state.stocks.length > 0) {
+            var extra = <EtfCalculator stocks={etfJson} leverage={this.props.leverage} />;
+            rows.push(<StockRow key={etfJson.hf_CL.name} name={etfJson.hf_CL.name} price={etfJson.hf_CL.price} yesterdayPrice={etfJson.hf_CL.yesterdayPrice} extra={extra} />);
+        }
+
+        return (
+            <table width="70%">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Percent</th>
+                        <th>Extra</th>
+                    </tr>
+                </thead>
+                <tbody>{rows}</tbody>
+            </table>
+        );
+  }
+}
+
+stockDataManage.stockNames = ['gb_hmi', 'gb_uco', 'gb_sco','hf_CL', 'gb_chau'];
+stockDataManage.stockLeverage = [
+    {symbol:'gb_uco', leverage:2, name: 'UCO'},
+    {symbol:'gb_sco', leverage:-2, name: 'SCO'},
+    {symbol:'gb_uwt', leverage:3, name: 'UWT'},
+    {symbol:'gb_dwt', leverage:-3, name: 'DWT'},
+];
+stockDataManage.retrieveData(function (stocks) {
+    ReactDOM.render(
+    <div>
+        <Header/>
+        <StockTable stocks={stocks} leverage={stockDataManage.stockLeverage} />
+    </div>,
+    $('#stock-list')[0]
+  );
+});
+
+</script>
+</html>
