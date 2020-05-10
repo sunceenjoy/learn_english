@@ -11,8 +11,8 @@ $c['voice_save_path'] = DOCROOT.'/webroot/voice';
 
 $c['session'] = function () {
     $params = [
-        'gc_maxlifetime' => 3600 * 24 * 10,
-        'cookie_lifetime' => 3600 * 24 * 10
+        'gc_maxlifetime' => 3600 * 24 * 10000,
+        'cookie_lifetime' => 3600 * 24 * 10000
     ];
     return new Symfony\Component\HttpFoundation\Session\Session(new Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage($params));
 };
@@ -171,9 +171,9 @@ $c['wordMeanDownloader'] = function ($c) {
 
 $c['phraseVoiceDownloader'] = function ($c) {
     $phraseVoiceDownloader = new \Eng\Core\Module\Phrases\Voice\VoiceDownloader($c['log.main'], $c['voice_save_path'].'/phrases');
+    $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\GoogleTranslation(null, $c['config']['google_api_key']));
     $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\NaturalReaders());
     $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\JinShan());
-    $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\GoogleTranslation(null, $c['config']['google_api_key']));
     return $phraseVoiceDownloader;
 };
 
