@@ -75,9 +75,11 @@ class VoiceDownloader
                 unlink($fileName);
                 chmod($finalPath, 0777);
                 return $this->getVoicePath($vendor, $phraseName);
+            } else {
+              $this->log->addWarning("Voice vendor %s copy failed");
             }
         } catch (VoiceDownloadException $e) {
-            $this->log->addWarning(sprintf("Voice vendor %s doesn't work!", $vendor->getVendor()));
+            $this->log->addWarning(sprintf("Voice vendor %s doesn't work: %s", $vendor->getVendor(), $e->getMessage()));
         }
         return false;
     }

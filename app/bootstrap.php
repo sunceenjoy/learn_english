@@ -7,7 +7,7 @@ $c['res_dir'] = DOCROOT.'/res';
 $c['config_dir'] = DOCROOT.'/config';
 $c['app_dir'] = DOCROOT.'/app';
 $c['log_dir'] = $c['res_dir'].'/logs';
-$c['voice_save_path'] = DOCROOT.'/webroot/voice';
+$c['voice_save_path'] = DOCROOT.'/public/voice';
 
 $c['session'] = function () {
     $params = [
@@ -171,9 +171,9 @@ $c['wordMeanDownloader'] = function ($c) {
 
 $c['phraseVoiceDownloader'] = function ($c) {
     $phraseVoiceDownloader = new \Eng\Core\Module\Phrases\Voice\VoiceDownloader($c['log.main'], $c['voice_save_path'].'/phrases');
-    $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\GoogleTranslation(null, $c['config']['google_api_key']));
     $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\NaturalReaders());
     $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\JinShan());
+    $phraseVoiceDownloader->addVendor(new \Eng\Core\Module\Phrases\Voice\Vendor\GoogleTranslation(null, $c['config']['google_api_key']));
     return $phraseVoiceDownloader;
 };
 
