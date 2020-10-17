@@ -74,7 +74,7 @@ class PhrasesController extends BaseController
         $phrase = $this->em->getRepository('Eng:PhrasesEntity')->find($phraseId);
 
         if (!$phrase) {
-            throw new EngNotFoundException("can not find this word");
+            throw new EngNotFoundException("can not find this phrase");
         }
 
         $json = array('status' => 0);
@@ -141,7 +141,7 @@ class PhrasesController extends BaseController
                 $entity->setVoice($voiceName);
                 $entity->setStatus(PhrasesEntity::NEWONE);
             } catch (\Exception $e) {
-                $this->log->addWarning(sprintf("Can not find this word's voice:%s, info:%s", $entity->getName(), $e->getMessage()));
+                $this->log->addWarning(sprintf("Can not find this phrase's voice:%s, info:%s", $entity->getName(), $e->getMessage()));
                 $errorPhrases[] = $entity->getName();
                 continue;
             }

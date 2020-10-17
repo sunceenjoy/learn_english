@@ -7,12 +7,12 @@ $c['res_dir'] = DOCROOT.'/res';
 $c['config_dir'] = DOCROOT.'/config';
 $c['app_dir'] = DOCROOT.'/app';
 $c['log_dir'] = $c['res_dir'].'/logs';
-$c['voice_save_path'] = DOCROOT.'/webroot/voice';
+$c['voice_save_path'] = DOCROOT.'/public/voice';
 
 $c['session'] = function () {
     $params = [
-        'gc_maxlifetime' => 3600 * 24 * 10,
-        'cookie_lifetime' => 3600 * 24 * 10
+        'gc_maxlifetime' => 3600 * 24 * 10000,
+        'cookie_lifetime' => 3600 * 24 * 10000
     ];
     return new Symfony\Component\HttpFoundation\Session\Session(new Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage($params));
 };

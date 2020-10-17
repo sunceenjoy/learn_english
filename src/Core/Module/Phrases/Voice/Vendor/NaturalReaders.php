@@ -12,16 +12,18 @@ class NaturalReaders extends VoiceDownload
     private $tokken = null;
     public function init()
     {
-        $jsonString = strip_tags($this->getHtml($this->tokkenUrl));
-        $jsonString = preg_replace('|^jQ.*\(|', '', $jsonString);
-        $jsonString = preg_replace('|\);$|', '', $jsonString);
-        $json = json_decode($jsonString, true);
-        if (empty($json) || $json['rst'] != true) {
-            throw new VoiceDownloadException($this->getVendor()." can not get tokken string!");
-        }
-        $this->tokken = $json['requesttoken'];
     }
 
+    private function getToken() {
+      $jsonString = strip_tags($this->getHtml($this->tokkenUrl));
+      $jsonString = preg_replace('|^jQ.*\(|', '', $jsonString);
+      $jsonString = preg_replace('|\);$|', '', $jsonString);
+      $json = json_decode($jsonString, true);
+      if (empty($json) || $json['rst'] != true) {
+          throw new VoiceDownloadException($this->getVendor()." can not get tokken string!");
+      }
+      $this->tokken = $json['requesttoken'];
+    }
     public function getVendor()
     {
         return 'NaturalReaders';
@@ -29,6 +31,9 @@ class NaturalReaders extends VoiceDownload
 
     public function downloadVoice($wordName)
     {
+      if (!$this->tokken) {
+        $this->getToken();
+      }
         $voiceUrl = sprintf($this->urlFormat, $wordName, $this->tokken);
 
         $savePath = $this->getTmpName();
